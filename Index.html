@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Easy PDF Tools – امیجز کو PDF میں پروفیشنل انداز میں کنورٹ کریں" />
+  <title>Easy PDF Tools</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Easy PDF Tools</h1>
+    <button id="modeToggle">🌙</button>
+  </header>
+
+  <main>
+    <div id="dropZone">Drag & Drop or Click to Upload Images</div>
+    <input type="file" id="fileInput" accept="image/*" multiple hidden />
+
+    <div id="imagePanel"></div>
+
+    <div id="controls" style="display:none;">
+      <button id="cropBtn">Crop</button>
+      <button id="rotateBtn">Rotate</button>
+      <label>Size:
+        <input type="range" id="sizeRange" min="100" max="1000" />
+      </label>
+      <label>Brightness:
+        <input type="range" id="brightnessRange" min="0" max="200" />
+      </label>
+      <label>Contrast:
+        <input type="range" id="contrastRange" min="0" max="200" />
+      </label>
+      <button id="generatePDF">Download PDF</button>
+    </div>
+  </main>
+
+  <script src="libs/pdf-lib.min.js"></script>
+  <script src="libs/cropper.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
