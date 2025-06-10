@@ -1,42 +1,25 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Easy PDF Tools – امیجز کو PDF میں پروفیشنل انداز میں کنورٹ کریں" />
-  <title>Easy PDF Tools</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Image to PDF</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>Easy PDF Tools</h1>
-    <button id="modeToggle">🌙</button>
-  </header>
+  <div class="container">
+    <h1>Advanced Image to PDF Converter</h1>
+    <button id="toggleTheme">Toggle Dark Mode</button>
+    <div id="dropArea">Drag & Drop Images Here or Click Below</div>
+    <input type="file" id="imageInput" multiple accept="image/*" />
+    
+    <div id="imagePreview"></div>
+    <button onclick="generatePDF()">Convert to PDF</button>
+  </div>
 
-  <main>
-    <div id="dropZone">Drag & Drop or Click to Upload Images</div>
-    <input type="file" id="fileInput" accept="image/*" multiple hidden />
-
-    <div id="imagePanel"></div>
-
-    <div id="controls" style="display:none;">
-      <button id="cropBtn">Crop</button>
-      <button id="rotateBtn">Rotate</button>
-      <label>Size:
-        <input type="range" id="sizeRange" min="100" max="1000" />
-      </label>
-      <label>Brightness:
-        <input type="range" id="brightnessRange" min="0" max="200" />
-      </label>
-      <label>Contrast:
-        <input type="range" id="contrastRange" min="0" max="200" />
-      </label>
-      <button id="generatePDF">Download PDF</button>
-    </div>
-  </main>
-
-  <script src="libs/pdf-lib.min.js"></script>
-  <script src="libs/cropper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet">
   <script src="script.js"></script>
 </body>
 </html>
