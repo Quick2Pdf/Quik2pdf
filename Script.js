@@ -1,113 +1,91 @@
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
-const imagePanel = document.getElementById('imagePanel');
-const controls = document.getElementById('controls');
-const cropBtn = document.getElementById('cropBtn');
-const rotateBtn = document.getElementById('rotateBtn');
-const sizeRange = document.getElementById('sizeRange');
-const brightnessRange = document.getElementById('brightnessRange');
-const contrastRange = document.getElementById('contrastRange');
-const generatePDF = document.getElementById('generatePDF');
-const modeToggle = document.getElementById('modeToggle');
+const imageInput = document.getElementById('imageInput');
+const imagePreview = document.getElementById('imagePreview');
+const dropArea = document.getElementById('dropArea');
+const toggleTheme = document.getElementById('toggleTheme');
+let images = [];
 
-let images = [], currentIdx = null, cropper = null;
-
-function initDarkMode() {
-  if (localStorage.getItem('mode') === 'dark') {
-    document.body.classList.add('dark');
-    modeToggle.textContent = '☀️';
-  }
-}
-modeToggle.onclick = () => {
+toggleTheme.onclick = () => {
   document.body.classList.toggle('dark');
-  modeToggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
-  localStorage.setItem('mode', document.body.classList.contains('dark') ? 'dark' : 'light');
 };
-initDarkMode();
 
-dropZone.onclick = () => fileInput.click();
-dropZone.ondrop = e => { e.preventDefault(); e.stopPropagation(); handleFiles(e.dataTransfer.files); };
-dropZone.ondragover = e => { e.preventDefault(); e.stopPropagation(); };
+dropArea.addEventListener('click', () => imageInput.click());
 
-fileInput.onchange = e => handleFiles(e.target.files);
+dropArea.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropArea.style.background = '#e0e0e0';
+});
+
+dropArea.addEventListener('dragleave', () => {
+  dropArea.style.background = '#fafafa';
+});
+
+dropArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropArea.style.background = '#fafafa';
+  handleFiles(e.dataTransfer.files);
+});
+
+imageInput.addEventListener('change', (e) => {
+  handleFiles(e.target.files);
+});
+
 function handleFiles(files) {
-  for (let file of files) {
-    const url = URL.createObjectURL(file);
-    images.push({ file, url, filters: { brightness: 100, contrast: 100 }, rotation: 0, cropped: false });
-    renderImages();
-  }
-}
+  imagePreview.innerHTML = '';
+  images = Array.from(files);
 
-function renderImages() {
-  imagePanel.innerHTML = '';
-  images.forEach((img, idx) => {
-    const el = document.createElement('img');
-    el.src = img.url;
-    if (idx === currentIdx) el.classList.add('selected');
-    el.onclick = () => selectImage(idx);
-    imagePanel.appendChild(el);
+  images.forEach((imageFile, index) => {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const img = new Image();
+      img.src = e.target.result;
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = 300;
+        canvas.height = 300;
+        ctx.drawImage(img, 0, 0, 300, 300);
+
+        const imgWrapper = document.createElement('div');
+        imgWrapper.className = 'preview-img';
+
+        const brightness = document.createElement('input');
+        brightness.type = 'range';
+        brightness.min = 0;
+        brightness.max = 2;
+        brightness.step = 0.1;
+        brightness.value = 1;
+
+        brightness.oninput = () => {
+          ctx.filter = `brightness(${brightness.value})`;
+          ctx.drawImage(img, 0, 0, 300, 300);
+        };
+
+        imgWrapper.appendChild(canvas);
+        imgWrapper.appendChild(brightness);
+        imagePreview.appendChild(imgWrapper);
+      };
+    };
+    reader.readAsDataURL(imageFile);
   });
 }
 
-function selectImage(idx) {
-  currentIdx = idx;
-  renderImages();
-  controls.style.display = 'block';
-  const img = images[idx];
-  if (cropper) { cropper.destroy(); cropper = null; }
-  const el = imagePanel.children[idx];
-  el.classList.add('selected');
-  cropper = new Cropper(el, { autoCropArea: 1, viewMode: 1 });
-  sizeRange.value = el.width;
-  brightnessRange.value = img.filters.brightness;
-  contrastRange.value = img.filters.contrast;
-}
+async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
 
-cropBtn.onclick = () => {
-  if (!cropper) return;
-  const canvas = cropper.getCroppedCanvas();
-  const url = canvas.toDataURL();
-  const el = imagePanel.children[currentIdx];
-  el.src = url;
-  images[currentIdx].url = url;
-  cropper.destroy();
-  cropper = null;
-};
+  const canvases = document.querySelectorAll('canvas');
 
-rotateBtn.onclick = () => {
-  const img = images[currentIdx];
-  img.rotation = (img.rotation + 90) % 360;
-  const el = imagePanel.children[currentIdx];
-  el.style.transform = `rotate(${img.rotation}deg)`;
-};
+  canvases.forEach((canvas, i) => {
+    const imgData = canvas.toDataURL('image/jpeg');
 
-[sizeRange, brightnessRange, contrastRange].forEach(el => {
-  el.oninput = () => {
-    if (currentIdx === null) return;
-    const img = images[currentIdx];
-    img.filters[el.id.replace('Range','')] = el.value;
-    const css = `brightness(${brightnessRange.value}%) contrast(${contrastRange.value}%)`;
-    imagePanel.children[currentIdx].style.filter = css;
-    imagePanel.children[currentIdx].style.width = sizeRange.value + 'px';
-  };
-});
+    if (i !== 0) pdf.addPage();
 
-generatePDF.onclick = async () => {
-  const pdfDoc = await PDFLib.PDFDocument.create();
-  for (let img of images) {
-    const imgBytes = await fetch(img.url).then(r => r.arrayBuffer());
-    const embedded = img.url.startsWith('data') ?
-      await pdfDoc.embedPng(imgBytes) : await pdfDoc.embedJpg(imgBytes);
-    const page = pdfDoc.addPage();
-    let { width, height } = page.getSize();
-    page.drawImage(embedded, {
-      x: 0, y: 0, width, height, rotate: PDFLib.degrees(img.rotation)
-    });
-  }
-  const bytes = await pdfDoc.save();
-  const blob = new Blob([bytes], { type: 'application/pdf' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'easy-pdf-tools.pdf';
-  a.click();
-};
+    const imgWidth = pdf.internal.pageSize.getWidth();
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+  });
+
+  pdf.save('converted.pdf');
+        }
