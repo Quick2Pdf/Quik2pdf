@@ -1,37 +1,59 @@
 body {
-  font-family: sans-serif;
-  margin: 0; padding: 0;
-  background: #fafafa;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  transition: background-color 0.3s, color 0.3s;
   color: #333;
-  transition: background 0.3s, color 0.3s;
+  margin: 0;
+  padding: 30px;
 }
+
 body.dark {
-  background: #1e1e1e;
-  color: #ddd;
+  background-color: #121212;
+  color: #fff;
 }
-header {
-  display: flex; justify-content: space-between;
-  padding: 1rem; background: #4a90e2; color: #fff;
-}
-#dropZone {
-  border: 2px dashed #aaa;
-  margin: 1rem auto;
-  width: 90%; padding: 2rem;
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
   text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .container {
+  background: #1f1f1f;
+  color: white;
+}
+
+#dropArea {
+  border: 2px dashed #999;
+  padding: 20px;
+  margin: 20px 0;
   cursor: pointer;
+  background-color: #fafafa;
 }
-#imagePanel img {
-  max-width: 150px;
-  margin: 0.5rem;
-  cursor: pointer;
-  border: 2px solid transparent;
+
+.preview-img {
+  position: relative;
+  margin: 10px;
+  display: inline-block;
 }
-#imagePanel img.selected {
-  border-color: #4a90e2;
+
+.preview-img canvas {
+  border: 1px solid #ccc;
+  max-width: 200px;
 }
-#controls {
-  margin: 1rem;
+
+.filter-controls {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 10px 0;
 }
-button, input[type="range"] {
-  margin: 0.5rem;
+
+.filter-controls input {
+  width: 100px;
 }
